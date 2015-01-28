@@ -128,7 +128,10 @@ const int LED3 = 53;
 const int LED4 = 54; 
 
 //pin used for read optical sensor value
-const int OPTICAL = 2;
+const int Right_Opt_One = 2;
+//const int Right_Opt_Two = 2;
+//const int Left_Opt_One = 2;
+//const int Left_Opt_Two = 2;
 
 //value read from the optical sensor
 boolean OPT_VAL = false;
@@ -166,8 +169,11 @@ void setup(){
     pinMode(LED2,OUTPUT);
     pinMode(LED3,OUTPUT);
     pinMode(LED4,OUTPUT);
-	pinMode(OPTICAL,INPUT);
-	pinMode(OPT_LED,OUTPUT);
+    pinMode(Right_Opt_One,INPUT);
+   // pinMode(Right_Opt_Two,INPUT);
+    //pinMode(Left_Opt_One,INPUT);
+   // pinMode(Left_Opt_Two,INPUT);
+    pinMode(OPT_LED,OUTPUT);
     
     //initialize the value for RELAY, OE, PMVR and PWM1
     //so that BUG does not move
@@ -198,7 +204,7 @@ void setup(){
     analogWrite(CLOCK, 0);
     
 	//read the optical sensor value and change the LED state
-	OPT_VAL=digitalRead(OPTICAL);
+	OPT_VAL=digitalRead(Right_Opt_One);
 	externalLED(OPT_VAL);
 	
     //setup the Wi-Fi for the BUG
@@ -514,10 +520,10 @@ static int protothread2(struct pt *pt, int interval){
 static int protothread3(struct pt *pt, int interval){
     static unsigned long timestamp = 0;
     PT_BEGIN(pt);
-    while(1){
-        PT_WAIT_UNTIL(pt, millis() - timestamp > interval);
+    PT_WAIT_UNTIL(pt, millis() - timestamp > interval);
+    while(1){        
         timestamp = millis();
-		OPT_VAL = digitalRead(OPTICAL);
+		OPT_VAL = digitalRead(Right_Opt_One);
         externalLED(OPT_VAL);
     }
     PT_END(pt);
