@@ -182,15 +182,15 @@ void setup(){
 	externalLED(wheelForward);
 	
     //setup the Wi-Fi for the BUG
-    //int conID = DWIFIcK::INVALID_CONNECTION_ID;
-    //lightLED(1,0,0,0);
-    //if((conID = WiFiConnectMacro()) != DWIFIcK::INVALID_CONNECTION_ID){
-    //    lightLED(0,1,0,0);
-    //    state = INITIALIZE;
-    //}else{
-    //    lightLED(1,1,0,0);
-    //    state = EXIT;
-    //}
+    int conID = DWIFIcK::INVALID_CONNECTION_ID;
+    lightLED(1,0,0,0);
+    if((conID = WiFiConnectMacro()) != DWIFIcK::INVALID_CONNECTION_ID){
+        lightLED(0,1,0,0);
+        state = INITIALIZE;
+    }else{
+        lightLED(1,1,0,0);
+        state = EXIT;
+    }
   
     // intialize the stack with a static IP
     DNETcK::begin(ipServer);
