@@ -129,12 +129,13 @@ const int LED4 = 54;
 
 //pin used for read optical sensor value
 const int Right_Opt_One = 2;
-//const int Right_Opt_Two = 2;
+const int Right_Opt_Two = 7;
 //const int Left_Opt_One = 2;
 //const int Left_Opt_Two = 2;
 
 //value read from the optical sensor
 boolean OPT_VAL = false;
+boolean OPT_VAL2 = false;
 
 //pin used for optical sensor's testing LED
 const int OPT_LED = 3;
@@ -155,9 +156,9 @@ bool wheelForward=true;
 //turn external LED on and off according to the optical sensor value
 void externalLED(boolean state){
 	if(state){
-		digitalWrite(OPT_LED,LOW);
-	}else{
 		digitalWrite(OPT_LED,HIGH);
+	}else{
+		digitalWrite(OPT_LED,LOW);
 	}	
 }
 
@@ -179,7 +180,7 @@ void setup(){
     pinMode(LED3,OUTPUT);
     pinMode(LED4,OUTPUT);
     pinMode(Right_Opt_One,INPUT);
-   // pinMode(Right_Opt_Two,INPUT);
+    pinMode(Right_Opt_Two,INPUT);
     //pinMode(Left_Opt_One,INPUT);
    // pinMode(Left_Opt_Two,INPUT);
     pinMode(OPT_LED,OUTPUT);
@@ -214,7 +215,8 @@ void setup(){
     
 	//read the optical sensor value and change the LED state
 	OPT_VAL=digitalRead(Right_Opt_One);
-	externalLED(OPT_VAL);
+        OPT_VAL=digitalRead(Right_Opt_Two);
+	externalLED(wheelForward);
 	
     //setup the Wi-Fi for the BUG
     int conID = DWIFIcK::INVALID_CONNECTION_ID;
@@ -335,15 +337,21 @@ void wheelDirection(bool in, bool out){
       encoderState=1;
     }
     if(encoderState==1){
-      if(encoderLastState==4)
+      if(encoderLastState==4){
         wheelForward=false;
+      }else{
+        wheelForward=true;
+      }
     }else if(encoderState==4){
-      if(encoderLastState==1)
+      if(encoderLastState==1){
         wheelForward=true;
-    }else if(encoderState-encoderLastState<0){
-        wheelForward=true;
-    }else{
+      }else{
         wheelForward=false;
+      }
+    }else if(encoderState-encoderLastState<0){
+        wheelForward=false;
+    }else{
+        wheelForward=true;
     }
 }
 
@@ -560,8 +568,18 @@ static int protothread3(struct pt *pt, int interval){
     PT_WAIT_UNTIL(pt, millis() - timestamp > interval);
     while(1){        
         timestamp = millis();
-		OPT_VAL = digitalRead(Right_Opt_One);
-        externalLED(OPT_VAL);
+        if(digitalRead(Right_Opt_One)==HIGH){
+          OPT_VAL=true;
+        }else{
+          OPT_VAL=false;
+        }
+        if(digitalRead(Right_Opt_Two)==HIGH){
+          OPT_VAL2=true;
+        }else{
+          OPT_VAL2=false;
+        }
+	wheelDirection(OPT_VAL,OPT_VAL2);
+        externalLED(wheelForward);
     }
     PT_END(pt);
 }
