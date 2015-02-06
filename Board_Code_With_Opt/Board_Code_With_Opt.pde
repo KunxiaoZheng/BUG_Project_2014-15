@@ -139,6 +139,15 @@ boolean OPT_VAL = false;
 //pin used for optical sensor's testing LED
 const int OPT_LED = 3;
 
+//current quad phase encoder state
+int encoderState=0;
+
+//last quad phase encoder state
+int encoderLastState=0;
+
+//the direction of the wheel
+bool wheelForward=true;
+
 //----------------------------------------------------------------------------------//
 //---------------------------End of BUG data Configuration--------------------------//
 //----------------------------------------------------------------------------------//
@@ -307,6 +316,34 @@ void lightLED(int valueLED1, int valueLED2, int valueLED3, int valueLED4){
         digitalWrite(LED4, HIGH);
     }else{
         digitalWrite(LED4, LOW);
+    }
+}
+
+//calculating the direction of retation for the wheel
+void wheelDirection(bool in, bool out){
+    if(in&&out){
+      encoderLastState=encoderState;
+      encoderState=2;
+    }else if(in&&!out){
+      encoderLastState=encoderState;
+      encoderState=3;
+    }else if(!in&&!out){
+      encoderLastState=encoderState;
+      encoderState=4;
+    }else if(!in&&out){
+      encoderLastState=encoderState;
+      encoderState=1;
+    }
+    if(encoderState==1){
+      if(encoderLastState==4)
+        wheelForward=false;
+    }else if(encoderState==4){
+      if(encoderLastState==1)
+        wheelForward=true;
+    }else if(encoderState-encoderLastState<0){
+        wheelForward=true;
+    }else{
+        wheelForward=false;
     }
 }
 
