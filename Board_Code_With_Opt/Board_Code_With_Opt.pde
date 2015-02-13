@@ -1,4 +1,4 @@
-#include <WiFiShieldOrPmodWiFi.h>
+//#include <WiFiShieldOrPmodWiFi.h>
 #include <DNETcK.h>
 //#include <DWIFIcK.h>
 #include <pt.h>
@@ -286,18 +286,19 @@ void lightLED(int valueLED1, int valueLED2, int valueLED3, int valueLED4){
 
 //calculating the direction of retation for the wheel
 void wheelDirection(bool in, bool out){
+    encoderLastState=encoderState;
     if(in&&out){
-      encoderLastState=encoderState;
       encoderState=2;
     }else if(in&&!out){
-      encoderLastState=encoderState;
-      encoderState=3;
+      encoderState=1;
     }else if(!in&&!out){
-      encoderLastState=encoderState;
       encoderState=4;
     }else if(!in&&out){
-      encoderLastState=encoderState;
-      encoderState=1;
+      encoderState=3;
+    }
+    if(encoderState!=encoderLastState){
+     Serial.println(encoderLastState);
+     Serial.println(encoderState);
     }
     if(encoderState==1){
       if(encoderLastState==4){
@@ -311,10 +312,10 @@ void wheelDirection(bool in, bool out){
       }else{
         wheelForward=false;
       }
-    }else if(encoderState-encoderLastState<0){
+    }else if(encoderState-encoderLastState>0){
         wheelForward=false;
     }else{
-        wheelForward=true;
+        wheelForward=true  ;
     }
 }
 
@@ -532,17 +533,18 @@ static int protothread3(struct pt *pt, int interval){
     while(1){        
         timestamp = millis();
         if(digitalRead(Right_Opt_One)==HIGH){
-          OPT_VAL=true;
-        }else{
           OPT_VAL=false;
+        }else{
+          OPT_VAL=true;
         }
         if(digitalRead(Right_Opt_Two)==HIGH){
-          OPT_VAL2=true;
-        }else{
           OPT_VAL2=false;
+        }else{
+          OPT_VAL2=true;
         }
 	wheelDirection(OPT_VAL,OPT_VAL2);
         externalLED(wheelForward);
+       
     }
     PT_END(pt);
 }
