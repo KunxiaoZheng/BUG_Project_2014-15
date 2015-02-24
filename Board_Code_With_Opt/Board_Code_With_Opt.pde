@@ -296,10 +296,13 @@ void wheelDirection(bool in, bool out){
     }else if(!in&&out){
       encoderState=3;
     }
-    if(encoderState!=encoderLastState){
+   if(encoderState!=encoderLastState){
+     Serial.println("New Reading------------------");
+     Serial.print("Last State: ");
      Serial.println(encoderLastState);
+     Serial.print("current state: ");
      Serial.println(encoderState);
-    }
+   
     if(encoderState==1){
       if(encoderLastState==4){
         wheelForward=false;
@@ -317,6 +320,7 @@ void wheelDirection(bool in, bool out){
     }else{
         wheelForward=true  ;
     }
+   }
 }
 
 //thread 1 that handles how the BUG should run, it calls the runBUG function
@@ -531,7 +535,9 @@ static int protothread3(struct pt *pt, int interval){
     PT_BEGIN(pt);
     PT_WAIT_UNTIL(pt, millis() - timestamp > interval);
     while(1){        
-        timestamp = millis();
+       // Serial.println("new reading");
+        //Serial.print("start");
+        //Serial.println(micros());
         if(digitalRead(Right_Opt_One)==HIGH){
           OPT_VAL=false;
         }else{
@@ -542,6 +548,8 @@ static int protothread3(struct pt *pt, int interval){
         }else{
           OPT_VAL2=true;
         }
+        //Serial.print("end");
+        //Serial.println(micros());
 	wheelDirection(OPT_VAL,OPT_VAL2);
         externalLED(wheelForward);
        
