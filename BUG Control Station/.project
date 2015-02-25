@@ -14,4 +14,11 @@
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>VLC</name>
+			<type>2</type>
+			<location>C:/Program Files/VideoLAN/VLC</location>
+		</link>
+	</linkedResources>
 </projectDescription>

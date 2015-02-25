@@ -66,6 +66,19 @@ class BUGTest{
         	this.outToServer.writeBytes( controlWordString );
     		
     		//read in response from server
+        	String tempBitch = "";
+        	tempBitch = inFromServer.readLine();
+        	/*
+        	while(true){
+        		
+        		if(tempBitch != "")
+        		{
+        			System.out.println(tempBitch);
+        		} else {
+        			break;
+        		}
+        	}
+        	*/
     		modifiedSentence = inFromServer.readLine(); 
     		//Grab the First 6 Bytes from the modified Sentence as those are the only bytes being used
     		modifiedSentence = modifiedSentence.substring(0,6);
@@ -80,7 +93,7 @@ class BUGTest{
         		
         		return true;
         	}else{
-        		System.out.println("Transmition Status: FAIL");
+        		System.out.println("Modified = "+ modifiedSentence + ", control = "+controlWordString);//"Transmition Status: FAIL");
         		
         		return false;
         	}

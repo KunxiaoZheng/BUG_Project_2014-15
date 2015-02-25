@@ -2,7 +2,15 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="C:/Users/Andrew/Documents/workspace/BUG Control Station/java build paths/jinput-test.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrew/Documents/workspace/BUG Control Station/java build paths/jna-3.5.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrew/Documents/workspace/BUG Control Station/java build paths/platform-3.5.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrew/Documents/workspace/BUG Control Station/java build paths/vlcj-2.4.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrew/Documents/workspace/BUG Control Station/java build paths/vlcj-2.4.1-javadoc.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrew/Documents/workspace/BUG Control Station/java build paths/vlcj-2.4.1-sources.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrew/Documents/workspace/BUG Control Station/java build paths/vlcj-2.4.1-tests.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrew/Documents/workspace/BUG Control Station/java build paths/vlcj-2.4.1-test-sources.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Andrew/Documents/workspace/BUG Control Station/java build paths/jinput.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Andrew/Documents/workspace/BUG Control Station/java build paths/jinput-test.jar"/>
+	<classpathentry kind="lib" path="C:/Program Files/VideoLAN/VLC"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
