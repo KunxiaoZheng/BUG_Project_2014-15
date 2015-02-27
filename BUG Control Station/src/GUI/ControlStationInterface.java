@@ -31,13 +31,19 @@ public class ControlStationInterface extends JPanel {
 	private static MediaPlayerFactory secondaryMediaPlayerFactory;
 	private static CanvasVideoSurface primaryVideoSurface;
 	private static CanvasVideoSurface secondaryVideoSurface;
+	private static JFrame frame;
+	private JPanel primaryPanel;
+	private JPanel secondaryPanel;
+	private JPanel infoPanel;
+	private JPanel buttonPanel;
+	private JPanel contentPanel;
 			
-	public ControlStationInterface() {
+	public ControlStationInterface(String mainCamera) {
 		
 		/*
 		 * Info contents
 		 */
-        JPanel infoPanel = new JPanel();
+        infoPanel = new JPanel();
         infoPanel.setBackground(Color.BLUE);
         infoPanel.setPreferredSize(new Dimension(300, 150));
         
@@ -48,10 +54,19 @@ public class ControlStationInterface extends JPanel {
         /*
          * Secondary view contents
          */
-        JPanel secondaryPanel = new JPanel();
+        secondaryPanel = new JPanel();
         secondaryPanel.setLayout(new BorderLayout());
-        secondaryPanel.setPreferredSize(new Dimension(300, 150));
         
+        // Set size of window depending on which camera is the main
+        if(mainCamera.equals("secondary")){
+        	secondaryPanel.setPreferredSize(new Dimension(900, 500));
+        } else if(mainCamera.equals("primary")){
+        	secondaryPanel.setPreferredSize(new Dimension(300, 150));
+        } else {
+        	System.out.println("ERROR: invalid main camera entered.");
+        }
+        
+        // An EmbeddedMediaPlayer cannot be added directly to a JPanel so it is added to a canvas instead
         Canvas secondaryCanvas = new Canvas();
         secondaryPanel.add(secondaryCanvas, BorderLayout.CENTER);
         secondaryCanvas.setVisible(true);
@@ -65,13 +80,31 @@ public class ControlStationInterface extends JPanel {
         /*
          * Button contents
          */
-        JPanel buttonPanel = new JPanel();
+        buttonPanel = new JPanel();
         buttonPanel.setLayout(new FlowLayout(FlowLayout.LEADING, 0, 0));
         buttonPanel.setBackground(Color.WHITE);
         buttonPanel.setPreferredSize(new Dimension(300, 150));
         
         JButton captureButton = new JButton("Capture Room");
         captureButton.setPreferredSize(new Dimension(300, 75));
+        captureButton.addActionListener(new ActionListener() {
+    		@Override
+    		public void actionPerformed(ActionEvent e) {
+    			secondaryMediaPlayer.stop();
+    	        primaryMediaPlayer.stop();
+    			frame.remove(contentPanel);
+    			frame.setContentPane(new ControlStationInterface("primary"));
+    			frame.pack();
+    			frame.invalidate();
+                frame.validate();
+    	        
+    	        secondaryMediaPlayer.playMedia("C:\\Users\\Andrew\\Downloads\\RoadBikeParty.mp4");
+    	        primaryMediaPlayer.playMedia("C:\\Users\\Andrew\\Downloads\\BikeParkour.mp4");
+    			//JFrame viewRoomFrame = new JFrame("Current Room View");
+    			//viewRoomFrame.setVisible(true);
+    			//viewRoomFrame.setLocationRelativeTo(null);
+    		}
+        });
         buttonPanel.add(captureButton);
         
         JButton viewButton = new JButton("View Room");
@@ -79,10 +112,19 @@ public class ControlStationInterface extends JPanel {
         viewButton.addActionListener(new ActionListener() {
     		@Override
     		public void actionPerformed(ActionEvent e) {
-    			
-    			JFrame viewRoomFrame = new JFrame("Current Room View");
-    			viewRoomFrame.setVisible(true);
-    			viewRoomFrame.setLocationRelativeTo(null);
+    			secondaryMediaPlayer.stop();
+    	        primaryMediaPlayer.stop();
+    			frame.remove(contentPanel);
+    			frame.setContentPane(new ControlStationInterface("secondary"));
+    			frame.pack();
+    			frame.invalidate();
+                frame.validate();
+    	        
+    	        secondaryMediaPlayer.playMedia("C:\\Users\\Andrew\\Downloads\\RoadBikeParty.mp4");
+    	        primaryMediaPlayer.playMedia("C:\\Users\\Andrew\\Downloads\\BikeParkour.mp4");
+    			//JFrame viewRoomFrame = new JFrame("Current Room View");
+    			//viewRoomFrame.setVisible(true);
+    			//viewRoomFrame.setLocationRelativeTo(null);
     		}
         });
         buttonPanel.add(viewButton);
@@ -91,10 +133,19 @@ public class ControlStationInterface extends JPanel {
         /*
          * Primary view contents
          */
-        JPanel primaryPanel = new JPanel();
+        primaryPanel = new JPanel();
         primaryPanel.setLayout(new BorderLayout());
-        primaryPanel.setPreferredSize(new Dimension(900, 500));
         
+        // Set size of window depending on which camera is the main
+        if(mainCamera.equals("primary")){
+        	primaryPanel.setPreferredSize(new Dimension(900, 500));
+        } else if(mainCamera.equals("secondary")){
+        	primaryPanel.setPreferredSize(new Dimension(300, 150));
+        } else {
+        	System.out.println("ERROR: invalid main camera entered.");
+        }
+        
+        // An EmbeddedMediaPlayer cannot be added directly to a JPanel so it is added to a canvas instead
         Canvas primaryCanvas = new Canvas();
         primaryPanel.add(primaryCanvas, BorderLayout.CENTER);
         primaryCanvas.setVisible(true);
@@ -107,39 +158,57 @@ public class ControlStationInterface extends JPanel {
         /*
          * Add all panels to the contentPanel to be added to the frame.
          */
-        JPanel contentPanel = new JPanel();
-        contentPanel.setLayout(new FlowLayout(FlowLayout.LEADING, 0, 0));
-        contentPanel.setPreferredSize(new Dimension(900, 650));
-        contentPanel.add(infoPanel);
-        contentPanel.add(secondaryPanel);
-        contentPanel.add(buttonPanel);
-        contentPanel.add(primaryPanel);
+        if(mainCamera.equals("primary")){
+        	contentPanel = new JPanel();
+            contentPanel.setLayout(new FlowLayout(FlowLayout.LEADING, 0, 0));
+            contentPanel.setPreferredSize(new Dimension(900, 650));
+            contentPanel.add(infoPanel);
+            contentPanel.add(secondaryPanel);
+            contentPanel.add(buttonPanel);
+            contentPanel.add(primaryPanel);
+            
+            add(contentPanel, BorderLayout.CENTER);
+        	
+        } else if(mainCamera.equals("secondary")){
+        	contentPanel = new JPanel();
+            contentPanel.setLayout(new FlowLayout(FlowLayout.LEADING, 0, 0));
+            contentPanel.setPreferredSize(new Dimension(900, 650));
+            contentPanel.add(infoPanel);
+            contentPanel.add(primaryPanel);
+            contentPanel.add(buttonPanel);
+            contentPanel.add(secondaryPanel);
+            
+            add(contentPanel, BorderLayout.CENTER);
+        	
+        } else {
+        	System.out.println("ERROR: invalid main camera entered.");
+        }
         
-        add(contentPanel, BorderLayout.CENTER);
     }
 	
-	
-	
-    public static void main(String s[]) {
+
+	public static void main(String s[]) {
     	
     	//used to import the library needed to use vlcj
         NativeLibrary.addSearchPath(
         RuntimeUtil.getLibVlcLibraryName(), "./vlc-2.1.1");
         Native.loadLibrary(RuntimeUtil.getLibVlcLibraryName(), LibVlc.class);
-    	
-    	System.setProperty("jna.library.path", "C:\\Users\\Andrew\\Documents\\workspace\\BUG Control Station\\java build paths");
         
-    	JFrame frame = new JFrame("BUG Control Station");
+        // Create the JFrame
+    	frame = new JFrame("BUG Control Station");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setContentPane(new ControlStationInterface());
-        //frame.setResizable(false);
+        frame.setContentPane(new ControlStationInterface("primary"));
+        frame.setResizable(false);
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
         
-        secondaryMediaPlayer.playMedia("http://192.168.1.110:8080/?action=stream");
-        //secondaryMediaPlayer.playMedia("C:\\Users\\Public\\Videos\\Sample Videos\\Wildlife.wmv");
-        primaryMediaPlayer.playMedia("http://192.168.1.110:8081/?action=stream");
+        // Start the EmbeddedMediaPlayers 
+        secondaryMediaPlayer.playMedia("C:\\Users\\Andrew\\Downloads\\RoadBikeParty.mp4");
+        primaryMediaPlayer.playMedia("C:\\Users\\Andrew\\Downloads\\BikeParkour.mp4");
+        
+        //secondaryMediaPlayer.playMedia("http://192.168.1.110:8080/?action=stream");
+        //primaryMediaPlayer.playMedia("http://192.168.1.110:8081/?action=stream");
     }
 }
 
