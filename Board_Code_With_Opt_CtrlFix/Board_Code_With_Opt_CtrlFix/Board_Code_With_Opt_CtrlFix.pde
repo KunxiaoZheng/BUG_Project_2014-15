@@ -262,14 +262,14 @@ void runBUG(byte rgbRead[]){
         digitalWrite(OE, HIGH);//added
         digitalWrite(DIR, HIGH);
         analogWrite(CLOCK, 127);
-        delay(10);
+        delay(50);
         steps = analogRead(PM);   
     }else if((steps < 920) && (DIRvalue == 0) && (OEvalue == 1)){  //turn right
         //enable the stepper motor
         digitalWrite(OE, HIGH);//added
         digitalWrite(DIR, LOW);
         analogWrite(CLOCK, 127);
-        delay(10);
+        delay(50);
         steps = analogRead(PM);
     }else if(OE == 0){   //turn stepper motor off ##ADDED THIS TO STOP IT FROM TURNING
         digitalWrite(OE, LOW);
@@ -406,7 +406,7 @@ static int protothread2(struct pt *pt, int interval){
                               bitsReceived++;
                             }
                         }
-                        state = PROCESS;
+                        state = PROCESSREAD;
                         Serial.println("");
                         Serial.println("Command Fully Receieved");
                         bitsReceived = 0;
