@@ -174,11 +174,11 @@ void setup(){
     
     //initialize the value for RELAY, OE, PMVR and PWM1
     //so that BUG does not move
-    digitalWrite(RELAY, HIGH);
+    digitalWrite(RELAY, LOW);
     digitalWrite(OE, HIGH);
     digitalWrite(PMVR, HIGH);
     analogWrite(PWM1, PWMvalue);
-  
+    
     for(int i = 0; i < sizeof(ReadQueue); i++){
         ReadQueue[i] = 0;
     }
@@ -204,20 +204,7 @@ void setup(){
 	OPT_VAL=digitalRead(Right_Opt_One);
         OPT_VAL=digitalRead(Right_Opt_Two);
 	externalLED(wheelForward);
-	
-    //setup the Wi-Fi for the BUG
-    //int conID = DWIFIcK::INVALID_CONNECTION_ID;
-    //lightLED(1,0,0,0);
-    //if((conID = WiFiConnectMacro()) != DWIFIcK::INVALID_CONNECTION_ID){
-    //    lightLED(0,1,0,0);
-    //    state = INITIALIZE;
-    //}else{
-    //    lightLED(1,1,0,0);
-    //    state = EXIT;
-    //}
-  
-    // intialize the stack with a static IP
-    //DNETcK::begin(ipServer);
+
     Serial.begin(9600); //added
 }
 
@@ -243,28 +230,28 @@ void runBUG(byte rgbRead[]){
     PWMvalue = int(char(rgbRead[3]) - 48)*100 + int(char(rgbRead[4]) - 48)*10 + int(char(rgbRead[5]) - 48);       
     
     if((RELAYvalue == 1) && (PWMvalue < 120)){
-        digitalWrite(RELAY, LOW);
+        digitalWrite(RELAY, HIGH);
         analogWrite(PWM1, 120);
     }else if((RELAYvalue == 1) && (PWMvalue > 227)){
-        digitalWrite(RELAY, LOW);
+        digitalWrite(RELAY, HIGH);
         analogWrite(PWM1, 227);
     }else if((RELAYvalue == 1) && (120 < PWMvalue < 227)){
-        digitalWrite(RELAY,LOW);
+        digitalWrite(RELAY,HIGH);
         analogWrite(PWM1, PWMvalue);    
     }else{
-        digitalWrite(RELAY, HIGH);
+        digitalWrite(RELAY, LOW);
         analogWrite(PWM1, PWMvalue);
     }
     digitalWrite(OE, HIGH);   //taken out
     steps = analogRead(PM);
-    if((steps > 230) && (DIRvalue == 1) && (OEvalue == 1)){  //turn left
+    if((steps > 250) && (DIRvalue == 1) && (OEvalue == 1)){  //turn left
         //enable the stepper motor
         digitalWrite(OE, HIGH);//added
         digitalWrite(DIR, HIGH);
         analogWrite(CLOCK, 127);
         delay(50);
         steps = analogRead(PM);   
-    }else if((steps < 920) && (DIRvalue == 0) && (OEvalue == 1)){  //turn right
+    }else if((steps < 980) && (DIRvalue == 0) && (OEvalue == 1)){  //turn right
         //enable the stepper motor
         digitalWrite(OE, HIGH);//added
         digitalWrite(DIR, LOW);
@@ -493,7 +480,7 @@ static int protothread2(struct pt *pt, int interval){
             */
             case CLOSE:
                 Serial.println("Closing Client");
-                digitalWrite(RELAY, HIGH);
+                digitalWrite(RELAY, LOW);
                 analogWrite(CLOCK, 0);
                 client.stop();
                 lightLED(1,0,1,1); 
@@ -507,7 +494,7 @@ static int protothread2(struct pt *pt, int interval){
             case EXIT:
                 Serial.print("EXIT ");
                 Serial.println("");
-                digitalWrite(RELAY, HIGH);
+                digitalWrite(RELAY, LOW);
                 analogWrite(CLOCK, 0);
                 client.stop();
                 lightLED(0,1,1,1);
