@@ -210,24 +210,8 @@ void setup(){
     ReadQueue[i] = 0;
   }
 
-  //Read the value of potentiometer and use it to center the motor
-  steps = analogRead(PM);
-  if(steps < 663){
-    while(steps < 663){
-      digitalWrite(DIR, LOW);
-      analogWrite(CLOCK, 127);
-      steps = analogRead(PM);
-    }
-  }
-  else if(steps > 663){
-    while(steps > 663){
-      digitalWrite(DIR, HIGH);
-      analogWrite(CLOCK, 127);
-      steps = analogRead(PM);
-    }
-  }
-  analogWrite(CLOCK, 0);
-
+  centerWheel();
+ 
   //read the optical sensor value and change the LED state
   //OPT_VAL=digitalRead(Right_Opt_One);
   //OPT_VAL=digitalRead(Right_Opt_Two);
@@ -276,7 +260,7 @@ void runBUG(byte rgbRead[]){
   }
   digitalWrite(OE, HIGH);   //taken out
   steps = analogRead(PM);
-  if((steps > 250) && (DIRvalue == 1) && (OEvalue == 1)){  //turn left
+  if((steps > 320) && (DIRvalue == 1) && (OEvalue == 1)){  //turn left
     //enable the stepper motor
     digitalWrite(OE, HIGH);//added
     digitalWrite(DIR, HIGH);
@@ -284,13 +268,16 @@ void runBUG(byte rgbRead[]){
     delay(50);
     steps = analogRead(PM);   
   }
-  else if((steps < 980) && (DIRvalue == 0) && (OEvalue == 1)){  //turn right
+  else if((steps < 975) && (DIRvalue == 0) && (OEvalue == 1)){  //turn right
     //enable the stepper motor
     digitalWrite(OE, HIGH);//added
     digitalWrite(DIR, LOW);
     analogWrite(CLOCK, 127);
     delay(50);
     steps = analogRead(PM);
+  }
+  else if((DIRvalue == 0) && (OEvalue == 0) && (RELAYvalue == 0)){
+      centerWheel();
   }
   else if(OE == 0){   //turn stepper motor off ##ADDED THIS TO STOP IT FROM TURNING
     digitalWrite(OE, LOW);
@@ -301,6 +288,25 @@ void runBUG(byte rgbRead[]){
   }
 }
 
+//Read the value of potentiometer and use it to center the motor
+void centerWheel(){
+    steps = analogRead(PM);
+    if(steps < 645){
+      while(steps < 645){
+        digitalWrite(DIR, LOW);
+        analogWrite(CLOCK, 127);
+        steps = analogRead(PM);
+      }
+    }
+    else if(steps > 655){
+      while(steps > 655){
+        digitalWrite(DIR, HIGH);
+        analogWrite(CLOCK, 127);
+        steps = analogRead(PM);
+      }
+    }
+    analogWrite(CLOCK, 0);
+}
 
 //lightLED - function
 //takes 4 int input
@@ -380,7 +386,7 @@ void right_in_ISR()
 {
   if(millis()-right_in_debouncing>10){
     right_in_debouncing=millis();
-    right_in_state=true;
+    right_in_state=digitalRead(Right_Opt_One);
     rightWheelDirection();
     delayMicroseconds(100);
     attachInterrupt(EXT_INT0, right_in_ISR2, RISING);
@@ -390,7 +396,7 @@ void right_in_ISR2()
 {
   if(millis()-right_in_debouncing>10){
     right_in_debouncing=millis();
-    right_in_state=false; 
+    right_in_state=digitalRead(Right_Opt_One); 
     rightWheelDirection();
     delayMicroseconds(100);
     attachInterrupt(EXT_INT0, right_in_ISR, FALLING);
@@ -402,7 +408,7 @@ void right_out_ISR()
 {
   if(millis()-right_out_debouncing>10){
     right_out_debouncing=millis();
-    right_out_state=true;
+    right_out_state=digitalRead(Right_Opt_Two);
     rightWheelDirection();
     delayMicroseconds(100);
     attachInterrupt(EXT_INT1, right_out_ISR2, RISING);
@@ -412,7 +418,7 @@ void right_out_ISR2()
 {
   if(millis()-right_out_debouncing>10){
     right_out_debouncing=millis();
-    right_out_state=false;
+    right_out_state=digitalRead(Right_Opt_Two);
     rightWheelDirection();
     delayMicroseconds(100);
     attachInterrupt(EXT_INT1, right_out_ISR, FALLING);
@@ -608,7 +614,7 @@ static int protothread2(struct pt *pt, int interval){
       steps = analogRead(PM);
 
       /*
-                * Sending Potentiometer to the Control Center:
+       * Sending Potentiometer to the Control Center:
        *
        * Convert the individual digits from the int 'steps' (this is a 3 digit int) into char
        * Then cast it as a byte and add the three in reverse order to the rbgWrite array to be
