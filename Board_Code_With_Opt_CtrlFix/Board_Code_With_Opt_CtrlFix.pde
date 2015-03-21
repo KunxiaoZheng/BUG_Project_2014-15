@@ -44,6 +44,7 @@ byte subnet[] = {
 //unsigned short portServer = DNETcK::iPersonalPorts44 + 400;
 unsigned short portServer = 44400;
 Server server = Server(portServer);
+Client client = server.available;
 
 STATE state = INITIALIZE;
 
@@ -81,6 +82,7 @@ int steps = 0;
 
 int bitsReceived = 0;
 int numBitsPerCommand = 6;
+
 
 //JA - Upper Bank
 //use for analog input of potentiometer
@@ -535,7 +537,7 @@ static int protothread2(struct pt *pt, int interval){
     PT_WAIT_UNTIL(pt, millis() - timestamp > interval);
     timestamp = millis();
 
-    Client client = server.available();
+    //Client client = server.available();
     int tempDigit = 0;
 
     switch(state){
