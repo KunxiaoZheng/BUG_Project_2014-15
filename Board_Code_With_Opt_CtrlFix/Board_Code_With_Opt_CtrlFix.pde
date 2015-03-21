@@ -44,7 +44,7 @@ byte subnet[] = {
 //unsigned short portServer = DNETcK::iPersonalPorts44 + 400;
 unsigned short portServer = 44400;
 Server server = Server(portServer);
-Client client = server.available;
+Client client = server.available();
 
 STATE state = INITIALIZE;
 
@@ -157,6 +157,9 @@ volatile bool left_out_past=false;
 volatile bool in_read=false;
 volatile bool out_read=false;
 
+volatile int rightVelocity;
+volatile int rightStateStart;
+volatile int rightStateEnd;
 //----------------------------------------------------------------------------------//
 //---------------------------End of BUG data Configuration--------------------------//
 //----------------------------------------------------------------------------------//
@@ -383,6 +386,24 @@ void rightWheelDirection(){
 }
 
 
+void rightWheelVelocity(){
+  rightVelocity=(21/(rightStateEnd-rightStateStart));
+ //Serial.println(rightVelocity);
+  if(rightVelocity<500){//the units for the rightVelocity is mm/ms
+    rightVelocity=0;
+  }
+  
+  rightStateStart=rightStateEnd;
+  sendDataToControl();
+  //Serial.println(rightVelocity);
+}
+
+void sendDataToControl(){
+  if(client.available()){
+    server.write(rightVelocity);
+  }
+}
+
 
 void right_in_ISR()
 {
@@ -390,6 +411,8 @@ void right_in_ISR()
     right_in_debouncing=millis();
     right_in_state=digitalRead(Right_Opt_One);
     rightWheelDirection();
+    rightStateEnd=right_in_debouncing;
+    rightWheelVelocity();
     delayMicroseconds(100);
     attachInterrupt(EXT_INT0, right_in_ISR2, RISING);
   }
@@ -400,6 +423,8 @@ void right_in_ISR2()
     right_in_debouncing=millis();
     right_in_state=digitalRead(Right_Opt_One); 
     rightWheelDirection();
+    rightStateEnd=right_in_debouncing;
+    rightWheelVelocity();
     delayMicroseconds(100);
     attachInterrupt(EXT_INT0, right_in_ISR, FALLING);
   }
@@ -412,6 +437,8 @@ void right_out_ISR()
     right_out_debouncing=millis();
     right_out_state=digitalRead(Right_Opt_Two);
     rightWheelDirection();
+    rightStateEnd=right_out_debouncing;
+    rightWheelVelocity();
     delayMicroseconds(100);
     attachInterrupt(EXT_INT1, right_out_ISR2, RISING);
   }
@@ -422,6 +449,8 @@ void right_out_ISR2()
     right_out_debouncing=millis();
     right_out_state=digitalRead(Right_Opt_Two);
     rightWheelDirection();
+    rightStateEnd=right_out_debouncing;
+    rightWheelVelocity();
     delayMicroseconds(100);
     attachInterrupt(EXT_INT1, right_out_ISR, FALLING);
   }
