@@ -7,6 +7,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 
 import javax.swing.*;
 
@@ -24,6 +25,8 @@ public class ControlStationInterface extends JPanel {
     /**
 	 * 
 	 */
+	public static ControlStationInterface csInterface;
+	
 	private static final long serialVersionUID = 1L;
 	private static EmbeddedMediaPlayer primaryMediaPlayer;
 	private static EmbeddedMediaPlayer secondaryMediaPlayer;
@@ -37,6 +40,8 @@ public class ControlStationInterface extends JPanel {
 	private JPanel infoPanel;
 	private JPanel buttonPanel;
 	private JPanel contentPanel;
+	
+	
 			
 	public ControlStationInterface(String mainCamera) {
 		
@@ -90,16 +95,8 @@ public class ControlStationInterface extends JPanel {
         captureButton.addActionListener(new ActionListener() {
     		@Override
     		public void actionPerformed(ActionEvent e) {
-    			secondaryMediaPlayer.stop();
-    	        primaryMediaPlayer.stop();
-    			frame.remove(contentPanel);
-    			frame.setContentPane(new ControlStationInterface("primary"));
-    			frame.pack();
-    			frame.invalidate();
-                frame.validate();
-    	        
-    	        secondaryMediaPlayer.playMedia("C:\\Users\\Andrew\\Downloads\\RoadBikeParty.mp4");
-    	        primaryMediaPlayer.playMedia("C:\\Users\\Andrew\\Downloads\\BikeParkour.mp4");
+    			setPrimaryCameraAsMain();
+    			
     			//JFrame viewRoomFrame = new JFrame("Current Room View");
     			//viewRoomFrame.setVisible(true);
     			//viewRoomFrame.setLocationRelativeTo(null);
@@ -112,19 +109,17 @@ public class ControlStationInterface extends JPanel {
         viewButton.addActionListener(new ActionListener() {
     		@Override
     		public void actionPerformed(ActionEvent e) {
-    			secondaryMediaPlayer.stop();
-    	        primaryMediaPlayer.stop();
-    			frame.remove(contentPanel);
-    			frame.setContentPane(new ControlStationInterface("secondary"));
-    			frame.pack();
-    			frame.invalidate();
-                frame.validate();
-    	        
-    	        secondaryMediaPlayer.playMedia("C:\\Users\\Andrew\\Downloads\\RoadBikeParty.mp4");
-    	        primaryMediaPlayer.playMedia("C:\\Users\\Andrew\\Downloads\\BikeParkour.mp4");
-    			//JFrame viewRoomFrame = new JFrame("Current Room View");
-    			//viewRoomFrame.setVisible(true);
-    			//viewRoomFrame.setLocationRelativeTo(null);
+    			setSecondaryCameraAsMain();
+    			JFrame viewRoomFrame = new JFrame("Current Room View");
+    			viewRoomFrame.setVisible(true);
+    			viewRoomFrame.setLocationRelativeTo(null);
+    			
+    			ImageIcon image = new ImageIcon("images/mini.jpg");
+    			JLabel label = new JLabel("", image, JLabel.CENTER);
+    			JPanel panel = new JPanel(new BorderLayout());
+    			panel.add( label, BorderLayout.CENTER );
+    			viewRoomFrame.setContentPane(panel);
+    			viewRoomFrame.pack();
     		}
         });
         buttonPanel.add(viewButton);
@@ -186,6 +181,42 @@ public class ControlStationInterface extends JPanel {
         
     }
 	
+	public void setPrimaryCameraAsMain(){
+		secondaryMediaPlayer.stop();
+        primaryMediaPlayer.stop();
+		frame.remove(contentPanel);
+		csInterface = new ControlStationInterface("primary");
+		frame.setContentPane(csInterface);
+		frame.pack();
+		frame.invalidate();
+        frame.validate();
+        
+        secondaryMediaPlayer.playMedia("C:\\Users\\Andrew\\Downloads\\RoadBikeParty.mp4");
+        primaryMediaPlayer.playMedia("C:\\Users\\Andrew\\Downloads\\BikeParkour.mp4");
+	
+	}
+	
+	public void setSecondaryCameraAsMain(){
+		secondaryMediaPlayer.stop();
+        primaryMediaPlayer.stop();
+		frame.remove(contentPanel);
+		csInterface = new ControlStationInterface("secondary");
+		frame.setContentPane(csInterface);
+		frame.pack();
+		frame.invalidate();
+        frame.validate();
+        
+        secondaryMediaPlayer.playMedia("C:\\Users\\Andrew\\Downloads\\RoadBikeParty.mp4");
+        primaryMediaPlayer.playMedia("C:\\Users\\Andrew\\Downloads\\BikeParkour.mp4");
+		
+	}
+	
+	public void setPotentiometer(String value){
+		
+		System.out.println("Potentiometer = " + value);
+		
+	}
+
 
 	public static void main(String s[]) {
     	
@@ -197,7 +228,7 @@ public class ControlStationInterface extends JPanel {
         // Create the JFrame
     	frame = new JFrame("BUG Control Station");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setContentPane(new ControlStationInterface("primary"));
+        frame.setContentPane(csInterface = new ControlStationInterface("primary"));
         frame.setResizable(false);
         frame.pack();
         frame.setLocationRelativeTo(null);
@@ -206,9 +237,24 @@ public class ControlStationInterface extends JPanel {
         // Start the EmbeddedMediaPlayers 
         secondaryMediaPlayer.playMedia("C:\\Users\\Andrew\\Downloads\\RoadBikeParty.mp4");
         primaryMediaPlayer.playMedia("C:\\Users\\Andrew\\Downloads\\BikeParkour.mp4");
-        
         //secondaryMediaPlayer.playMedia("http://192.168.1.110:8080/?action=stream");
         //primaryMediaPlayer.playMedia("http://192.168.1.110:8081/?action=stream");
+        
+        //MatlabCommunications matComm = new MatlabCommunications();
+        //matComm.start();
+        
+        // Start communication with the BUG
+ 		BUGCommunications bugComm = new BUGCommunications(csInterface);
+ 		
+ 		// Start the joystick functionality
+ 		
+ 		try {
+ 			bugComm.joystickControl();
+ 		} catch (IOException e) {
+ 			// TODO Auto-generated catch block
+ 			System.out.println("Error starting the joystick.");
+ 			e.printStackTrace();
+ 		}
     }
 }
 
