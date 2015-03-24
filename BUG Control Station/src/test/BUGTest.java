@@ -64,22 +64,9 @@ class BUGTest{
         	//Send the control word to the BUG
         	System.out.println("The Control Word is: " + controlWordString);     		
         	this.outToServer.writeBytes( controlWordString );
-    		
-    		//read in response from server
-        	String tempBitch = "";
-        	tempBitch = inFromServer.readLine();
-        	/*
-        	while(true){
-        		
-        		if(tempBitch != "")
-        		{
-        			System.out.println(tempBitch);
-        		} else {
-        			break;
-        		}
-        	}
-        	*/
+        	
     		modifiedSentence = inFromServer.readLine(); 
+    		//this.inFromServer.close();
     		//Grab the First 6 Bytes from the modified Sentence as those are the only bytes being used
     		modifiedSentence = modifiedSentence.substring(0,6);
     		

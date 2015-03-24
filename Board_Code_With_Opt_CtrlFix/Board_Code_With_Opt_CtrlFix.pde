@@ -43,8 +43,12 @@ byte subnet[] = {
 //use port 44400
 //unsigned short portServer = DNETcK::iPersonalPorts44 + 400;
 unsigned short portServer = 44400;
+
+
 Server server = Server(portServer);
-Client client = server.available();
+  
+Server opticalServer = Server(200);
+
 
 STATE state = INITIALIZE;
 
@@ -181,6 +185,7 @@ void setup(){
 
   // start listening for clients
   server.begin();
+  opticalServer.begin();
 
   //initialize the two threads needed for communication and running BUG
   PT_INIT(&pt1);
@@ -270,7 +275,7 @@ void runBUG(byte rgbRead[]){
     digitalWrite(OE, HIGH);//added
     digitalWrite(DIR, HIGH);
     analogWrite(CLOCK, 127);
-    delay(50);
+    delay(10);
     steps = analogRead(PM);   
   }
   else if((steps < 975) && (DIRvalue == 0) && (OEvalue == 1)){  //turn right
@@ -278,7 +283,7 @@ void runBUG(byte rgbRead[]){
     digitalWrite(OE, HIGH);//added
     digitalWrite(DIR, LOW);
     analogWrite(CLOCK, 127);
-    delay(50);
+    delay(10);
     steps = analogRead(PM);
   }
   else if((DIRvalue == 0) && (OEvalue == 0) && (RELAYvalue == 0)){
@@ -296,15 +301,15 @@ void runBUG(byte rgbRead[]){
 //Read the value of potentiometer and use it to center the motor
 void centerWheel(){
     steps = analogRead(PM);
-    if(steps < 645){
-      while(steps < 645){
+    if(steps < 655){
+      while(steps < 655){
         digitalWrite(DIR, LOW);
         analogWrite(CLOCK, 127);
         steps = analogRead(PM);
       }
     }
-    else if(steps > 655){
-      while(steps > 655){
+    else if(steps > 620){
+      while(steps > 620){
         digitalWrite(DIR, HIGH);
         analogWrite(CLOCK, 127);
         steps = analogRead(PM);
@@ -399,8 +404,9 @@ void rightWheelVelocity(){
 }
 
 void sendDataToControl(){
-  if(client.available()){
-    server.write(rightVelocity);
+  Client opticalClient = opticalServer.available();
+  if(opticalClient.available()){
+    opticalServer.print(rightVelocity);
   }
 }
 
@@ -557,16 +563,18 @@ static int protothread1(struct pt *pt, int interval){
 
 //thread 2 that handles the communication of BUG
 static int protothread2(struct pt *pt, int interval){
+  
+  
   static unsigned long timestamp = 0;
   PT_BEGIN(pt);
 
   //Serial.print("Waiting for connection");
-  Serial.println("Ready for communication");
+  //Serial.println("Ready for communication");
   while(1){
     PT_WAIT_UNTIL(pt, millis() - timestamp > interval);
     timestamp = millis();
 
-    //Client client = server.available();
+    Client client = server.available();
     int tempDigit = 0;
 
     switch(state){
@@ -586,7 +594,7 @@ static int protothread2(struct pt *pt, int interval){
 
       if(client){
         if(client.available()){
-          Serial.print("Received: ");
+          //Serial.print("Received: ");
           while(bitsReceived < numBitsPerCommand){
 
             // read the bytes incoming from the client:
@@ -595,13 +603,13 @@ static int protothread2(struct pt *pt, int interval){
 
               // Fill rgbRead with the 6 bits sent 
               rgbRead[bitsReceived] = bitReceivedFromClient;
-              Serial.print(rgbRead[bitsReceived]);
+              //Serial.print(rgbRead[bitsReceived]);
               bitsReceived++;
             }
           }
           state = PROCESSREAD;
-          Serial.println("");
-          Serial.println("Command Fully Receieved");
+          //Serial.println("");
+          //Serial.println("Command Fully Receieved");
           bitsReceived = 0;
         }
       }
@@ -634,7 +642,7 @@ static int protothread2(struct pt *pt, int interval){
             *  Return what was sent and the angle of the wheel to the client so the client can do error checking.
        */
     case WRITE:
-      Serial.println("Writing back to Control Station");
+      //Serial.println("Writing back to Control Station");
 
       //populate the rgbWrite buffer to be sent to then control station
       for(int i = 0; i < sizeof(rgbWrite); i++){
@@ -672,8 +680,8 @@ static int protothread2(struct pt *pt, int interval){
       //transmit the data back to the control station
       //server.write(rgbWrite, sizeof(rgbWrite));
       server.write(rgbWrite, sizeof(rgbWrite));
-      Serial.println("Sent to Control Center");
-      Serial.println("");
+      //Serial.println("Sent to Control Center");
+      //Serial.println("");
 
 
       tStart = (unsigned) millis();
@@ -685,7 +693,7 @@ static int protothread2(struct pt *pt, int interval){
             *  Close the connection when the client is lost, stop the BUG, and go back to the INITIALIZE state.
        */
     case CLOSE:
-      Serial.println("Closing Client");
+      //Serial.println("Closing Client");
       digitalWrite(RELAY, LOW);
       analogWrite(CLOCK, 0);
       client.stop();
@@ -698,8 +706,8 @@ static int protothread2(struct pt *pt, int interval){
             *   Something bad happen, just exit out of the program and clean up.
        */
     case EXIT:
-      Serial.print("EXIT ");
-      Serial.println("");
+      //Serial.print("EXIT ");
+      //Serial.println("");
       digitalWrite(RELAY, LOW);
       analogWrite(CLOCK, 0);
       client.stop();
