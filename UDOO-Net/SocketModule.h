@@ -33,7 +33,10 @@ class SocketModule{
   virtual ~SocketModule();
 
   //create server USocket
-  bool createsocket();
+  bool createserver(int port);
+
+  //client initialize and connect to server
+  bool connectclient(string host, int port);
 
   //bind server socket to a port
   bool bind ( const int port );
@@ -43,9 +46,6 @@ class SocketModule{
 
   //accept connection from client
   bool accept ();
-
-  //client initialize and connect to server
-  bool connectclient(string host, int port);
 
   //send string to socket
   bool sendmsg ( string msg );
@@ -58,9 +58,11 @@ class SocketModule{
 
  private:
 
-  int m_listensd,m_acceptsd;
+  int m_serverbool,m_listensd,m_connectionsd;
   struct sockaddr_in m_addr;
   string m_msg;
+  struct file;
+
 
 };
 

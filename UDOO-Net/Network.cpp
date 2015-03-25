@@ -16,25 +16,25 @@ using namespace std;
 
 bool do_server() {
 	bool running = true;
-	SocketModule server;
-	server.createsocket();
-	server.bind(DEFAULT_PORT);
-	server.accept();
+
+	SocketModule* server= new SocketModule;
+	server->createserver(12345);
+	std::cout<<"createdserver";
 
 	while (running){
-		server.listen();
-		server.receivemsg();
-		server.sendmsg("received msg");
+		server->receivemsg();
+		server->sendmsg("received msg");
 	}
 	return 1;
 }
 
 bool do_client(){
-	SocketModule client;
-	client.createsocket();
-	client.connectclient("127.0.0.1", DEFAULT_PORT);
-	while(1){
-	client.sendmsg("heyshitlords");
+	SocketModule* client = new SocketModule;
+	client->connectclient("127.0.0.1", 12345);
+	std::cout<<"connectedclient";
+	bool running = true;
+	while(running){
+	client->sendmsg("heyshitlords");
 	}
 	return 1;
 }
@@ -58,6 +58,7 @@ int main(void) {
 	//delete serversocket;
 	//delete clientsocket;
 
+	//do_server();
 	return EXIT_SUCCESS;
 }
 

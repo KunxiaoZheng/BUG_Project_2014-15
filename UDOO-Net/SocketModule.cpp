@@ -22,36 +22,82 @@ int printstatus(string statusmsg){
 	return 0;
 }
 
-SocketModule::SocketModule() :   m_listensd(-1), m_acceptsd(-1){
+SocketModule::SocketModule(){
+	m_serverbool=-1;
+	m_listensd=-1;
+	m_connectionsd=-1;
 	memset (&m_addr, 0, sizeof(m_addr));
 }
 
 SocketModule::~SocketModule(){
-	::close (m_listensd);
-	::close (m_acceptsd);
+	//::close (m_listensd);
+	//::close (m_acceptsd);
 }
 
-bool SocketModule::createsocket(){
+bool SocketModule::createserver(int port){
+
+	if (m_serverbool == -1)	m_serverbool=1;
 
 	//create socket descriptor
-	if ((m_listensd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0){
-		printstatus("createserver::Failed to create TCP stream socket.\n");
+	if (m_serverbool==1){
+		if ((m_listensd = socket(AF_INET, SOCK_STREAM, 0)) < 0){
+			printstatus("createserver::Failed to create TCP stream socket.\n");
+				return false;
+		}else{
+			printstatus("createserver::created TCP stream socket");
+		}
+
+		bind(port);
+		listen();
+		accept();
+		return 1;
+	}else
+	return 0;
+
+}
+
+bool SocketModule::connectclient ( string host, int port ){
+	if (m_serverbool==-1) m_serverbool = 0;
+
+	if (m_serverbool==0){
+
+		if ((m_connectionsd = socket(AF_INET, SOCK_STREAM, 0)) < 0){
+			printstatus("connectclient::Failed to create TCP stream socket.\n");
+			return false;
+		}else{
+			printstatus("connectclient::created TCP stream socket");
+		}
+
+	m_addr.sin_family = AF_INET;
+	m_addr.sin_port = htons(port);
+
+	if(::inet_pton ( AF_INET, host.c_str(), &m_addr.sin_addr) != 1){
+		printstatus("connectclient::inet_pton failed");
+		return false;
+	}
+
+
+	// returns false if connect() fails
+	if ( (::connect(m_connectionsd,(struct sockaddr*) &m_addr,sizeof(m_addr))) < 0 ){
+		printstatus("client connect() failed");
 		return false;
 	}else{
-		printstatus("createserver::created TCP stream socket");
+		printstatus("client connect() succeeded");
 		return true;
+
 	}
 }
+
+	printstatus("client connect() succeeded");
+	return false;
+}
+
 
 bool SocketModule::bind (const int port){
 
   m_addr.sin_family = AF_INET;
-  m_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+  m_addr.sin_addr.s_addr = htons(INADDR_ANY);
   m_addr.sin_port = htons (port);
-
-  //example from exampleserver
-  //rc = bind(listen_sd, (struct sockaddr *)&addr, sizeof(addr));
-
 
   if(::bind(m_listensd,(struct sockaddr*)&m_addr,sizeof(m_addr)) < 0){
 	  printstatus("bind failed");
@@ -60,6 +106,7 @@ bool SocketModule::bind (const int port){
   printstatus("bind success");
   return true;
 }
+
 
 bool SocketModule::listen() const{
 
@@ -73,8 +120,9 @@ bool SocketModule::listen() const{
 }
 
 bool SocketModule::accept(){
-	int addr_length = sizeof(m_addr);
-	if((m_acceptsd = ::accept(m_listensd, (sockaddr*)&m_addr, (socklen_t*) &addr_length )) < 0 ){
+	socklen_t addrlen = sizeof(m_addr);
+	m_connectionsd = ::accept(m_listensd, (struct sockaddr*)&m_addr, &addrlen );
+	if(m_connectionsd < 0 ){
 		printstatus("accept() failure");
 		return false;
 	}else{
@@ -83,15 +131,18 @@ bool SocketModule::accept(){
 	}
 }
 
+//server and client
 bool SocketModule::sendmsg (string msg){
   int status;
-  if ((status = ::send (m_acceptsd, msg.c_str(), msg.size(), MSG_NOSIGNAL))==-1){
-	  return false;
-  }else{
-	  std::cout << "send " << status << "characters\n";
-	  std::cout << msg << "sent\n";
+
+  	  status = ::send (m_connectionsd, msg.c_str(), msg.size(), 0);
+  	  if (status == -1){
+  		  return false;
+  	  }else{
+  		  std::cout << "send " << status << "characters\n";
+  		  std::cout << msg << "sent\n";
 	  return true;
-  }
+  	  }
 }
 
 int SocketModule::receivemsg (){
@@ -100,10 +151,11 @@ int SocketModule::receivemsg (){
 
 	memset ( buf, 0, MAXRECEIVE + 1 );
 
-	long int status;
+	int status;
 
 	//checking on status of the read
-	if ((status = recv( m_acceptsd, &buf, MAXRECEIVE,0))== -1 ){
+	status = recv( m_connectionsd, &buf, MAXRECEIVE,0);
+	if (status == -1){
 		printstatus("SocketModule::receivemsg recv() failed\n");
 		return 0;
     }
@@ -120,26 +172,6 @@ int SocketModule::receivemsg (){
     }
 }
 
-bool SocketModule::connectclient ( const string host, const int port ){
-
-	m_addr.sin_family = AF_INET;
-	m_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	m_addr.sin_port = htons(port);
-
-	if(::inet_pton ( AF_INET, host.c_str(), &m_addr.sin_addr) != 1){
-		return false;
-	}
-
-	// returns false if connect() fails
-	if ( (::connect(m_sockfd,(sockaddr*) &m_addr,sizeof(m_addr))) < 0 ){
-		printstatus("client connect() failed");
-		return false;
-	}else{
-		printstatus("client connect() succeeded");
-		return true;
-
-	}
-}
 
 bool sendfile(){
 	return false;
