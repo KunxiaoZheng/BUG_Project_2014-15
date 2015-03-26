@@ -611,7 +611,13 @@ static int protothread2(struct pt *pt, int interval){
           //Serial.println("");
           //Serial.println("Command Fully Receieved");
           bitsReceived = 0;
-        }
+
+	//else if there is no message received, disable drive motor.
+        }else{
+		rgbRead[2]=0;
+	 	state = PROCESSREAD;
+	}
+		
       }
 
       break; 
