@@ -7,22 +7,33 @@ before_bearing = xv_true(3); %save bearing angle before movement occured
 
 %% untested calculations
 
-%velocitites of back wheels come in as mm/ms
+
+%potentiometer value is between 0 and 1024
+%convert to angle (in radians)
+pot = ((pot_val-308) *pi)/655;
+pot = pi/2 - pot 
+
+%velocities of the back wheels come in as mm/ms
 left = left_vel*100; %convert velocity of wheels to cm/s
 right = right_vel*100;
+
+
+%% use this to calculate the left wheel velocity if it is missing
+%alpha=(0.432)/(0.425); 
+%if(abs(pot)< (pi/2)-0.07)  %When the turning angle is not approaching +/- pi/2
+%    left=right*(2-alpha*tan(pot))/(2+alpha*tan(pot));
+
+%else   %When the turning angle is approaching +/- pi/2
+%    left=-right;
 
 
 %%
 %instantaneous forward velocity
 Sv = (left+right)/2;
 
-%instantateous angular velocity
+%instantaneous angular velocity
 w = (right-left)/(43.2)
 
-%potentiometer value is between 0 and 1024
-%convert to angle (in radians)
-pot = (pot_val *pi)/1024;
-pot = pi/2 - pot 
 
 delta = 1:2; %setup 1x2 matrix for delta x and delta y
 
